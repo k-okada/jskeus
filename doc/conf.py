@@ -28,6 +28,7 @@ def sh(command):
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     # run make rst
+    sh("cd ..; make")
     sh("make rst")
 
 # -- General configuration ------------------------------------------------
