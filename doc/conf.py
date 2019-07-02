@@ -28,6 +28,7 @@ def sh(command):
 on_rtd = os.environ.get('READTHEDOCS') == 'True'
 if on_rtd:
     # run make rst
+    sh("apt-get update; apt-get install -y git make gcc g++ libjpeg-dev libxext-dev libx11-dev libgl1-mesa-dev libglu1-mesa-dev libpq-dev libpng12-dev xfonts-100dpi xfonts-75dpi gsfonts-x11 texlive-fonts-extra xfonts-100dpi-transcoded xfonts-75dpi-transcoded msttcorefonts")
     sh("cd ..; make")
     sh("make rst")
 
