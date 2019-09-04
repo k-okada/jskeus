@@ -189,7 +189,7 @@ clean:
 	-rm -f $(INSTALLOBJDIR)/compile_*.log
 	chmod a-x Makefile* *.l *.c
 	(cd PQP;make clean)
-	(cd $(EUSDIR)/lisp/image/jpeg/; make clean)
+	#(cd $(EUSDIR)/lisp/image/jpeg/; make clean)
 	-rm -f $(EUSDIR)/lib/llib/pgsql.c $(EUSDIR)/lib/llib/pgsql.h
 	-rm -f $(EUSDIR)/lib/llib/time.c $(EUSDIR)/lib/llib/time.h
 
