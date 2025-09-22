@@ -12,17 +12,20 @@ jobs:
     strategy:
       matrix:
         include:
-          - DOCKER_IMAGE: ubuntu:trusty
-          - DOCKER_IMAGE: ubuntu:xenial
-          - DOCKER_IMAGE: ubuntu:bionic
-          - DOCKER_IMAGE: ubuntu:bionic
-            COLLISION_LIB: PQP
-          - DOCKER_IMAGE: ubuntu:bionic
-            COLLISION_LIB: BULLET
-          - DOCKER_IMAGE: ubuntu:focal
-          - DOCKER_IMAGE: debian:stretch
-          - DOCKER_IMAGE: osrf/ubuntu_armhf:trusty
-          - DOCKER_IMAGE: osrf/ubuntu_armhf:xenial
+          # - DOCKER_IMAGE: ubuntu:trusty
+          # - DOCKER_IMAGE: ubuntu:xenial
+          # - DOCKER_IMAGE: ubuntu:bionic
+          # - DOCKER_IMAGE: ubuntu:bionic
+          #   COLLISION_LIB: PQP
+          # - DOCKER_IMAGE: ubuntu:bionic
+          #   COLLISION_LIB: BULLET
+          # - DOCKER_IMAGE: ubuntu:focal
+          # - DOCKER_IMAGE: debian:stretch
+          # - DOCKER_IMAGE: osrf/ubuntu_armhf:trusty
+          # - DOCKER_IMAGE: osrf/ubuntu_armhf:xenial
+          - DOCKER_IMAGE: debian:sid
+          - DOCKER_IMAGE: debian:sid
+            USE_EXPERIMENTAL: TRUE
       fail-fast: false
 
     runs-on: ubuntu-latest
@@ -45,195 +48,195 @@ jobs:
           if [[ "$DOCKER_IMAGE" == *"arm"* ]]; then sudo apt-get install -y -qq qemu-user-static git; fi
           if [[ "$DOCKER_IMAGE" == *"arm64v8"* ]]; then export QEMU_VOLUME="-v /usr/bin/qemu-aarch64-static:/usr/bin/qemu-aarch64-static"; export PLATFORM_OPTION="--platform linux/aarch64"; fi #
           echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
-          docker run $PLATFORM_OPTION --rm $QEMU_VOLUME -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "DOCKER_IMAGE=$DOCKER_IMAGE" -e "COLLISION_LIB=$COLLISION_LIB" -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
+          docker run $PLATFORM_OPTION --rm $QEMU_VOLUME -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "DOCKER_IMAGE=$DOCKER_IMAGE" -e "COLLISION_LIB=$COLLISION_LIB" -e "USE_EXPERIMENTAL=$USE_EXPERIMENTAL" -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
 
-  linux-arm:
-    strategy:
-      matrix:
-        include:
-          - DOCKER_IMAGE: arm64v8/ubuntu:xenial
-          - DOCKER_IMAGE: arm64v8/ubuntu:bionic
-          - DOCKER_IMAGE: arm64v8/ubuntu:focal
-          - DOCKER_IMAGE: arm64v8/ubuntu:jammy
-          - DOCKER_IMAGE: arm64v8/ubuntu:noble
-          - DOCKER_IMAGE: arm64v8/debian:stretch
-          - DOCKER_IMAGE: arm64v8/debian:buster
-          - DOCKER_IMAGE: arm64v8/debian:bullseye
-          - DOCKER_IMAGE: arm64v8/debian:bookworm
-          - DOCKER_IMAGE: arm64v8/debian:trixie
-          - DOCKER_IMAGE: arm64v8/debian:sid
-      fail-fast: false
+  # linux-arm:
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         - DOCKER_IMAGE: arm64v8/ubuntu:xenial
+  #         - DOCKER_IMAGE: arm64v8/ubuntu:bionic
+  #         - DOCKER_IMAGE: arm64v8/ubuntu:focal
+  #         - DOCKER_IMAGE: arm64v8/ubuntu:jammy
+  #         - DOCKER_IMAGE: arm64v8/ubuntu:noble
+  #         - DOCKER_IMAGE: arm64v8/debian:stretch
+  #         - DOCKER_IMAGE: arm64v8/debian:buster
+  #         - DOCKER_IMAGE: arm64v8/debian:bullseye
+  #         - DOCKER_IMAGE: arm64v8/debian:bookworm
+  #         - DOCKER_IMAGE: arm64v8/debian:trixie
+  #         - DOCKER_IMAGE: arm64v8/debian:sid
+  #     fail-fast: false
 
-    runs-on: ubuntu-24.04-arm
-    timeout-minutes: 90
+  #   runs-on: ubuntu-24.04-arm
+  #   timeout-minutes: 90
 
-    name: linux-arm
+  #   name: linux-arm
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run test
-        shell: bash
-        run: |
-          set -x
-          export CI_SOURCE_PATH=$(pwd)
-          export REPOSITORY_NAME=${PWD##*/}
-          export TRAVIS_BRANCH=${GITHUB_REF#refs/heads/}
-          export TRAVIS_OS_NAME=linux
-          export DOCKER_IMAGE=${{matrix.DOCKER_IMAGE}}
-          echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
-          docker run --rm $QEMU_VOLUME -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "DOCKER_IMAGE=$DOCKER_IMAGE" -e "COLLISION_LIB=$COLLISION_LIB" -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Run test
+  #       shell: bash
+  #       run: |
+  #         set -x
+  #         export CI_SOURCE_PATH=$(pwd)
+  #         export REPOSITORY_NAME=${PWD##*/}
+  #         export TRAVIS_BRANCH=${GITHUB_REF#refs/heads/}
+  #         export TRAVIS_OS_NAME=linux
+  #         export DOCKER_IMAGE=${{matrix.DOCKER_IMAGE}}
+  #         echo "Testing branch $TRAVIS_BRANCH of $REPOSITORY_NAME"
+  #         docker run --rm $QEMU_VOLUME -v $CI_SOURCE_PATH:$CI_SOURCE_PATH -e "DOCKER_IMAGE=$DOCKER_IMAGE" -e "COLLISION_LIB=$COLLISION_LIB" -e "CI_SOURCE_PATH=$CI_SOURCE_PATH" -e "HOME=$HOME" -t $DOCKER_IMAGE sh -c "cd $CI_SOURCE_PATH; ./.travis.sh"
 
-  catkin:
-    runs-on: ubuntu-latest
-    container:
-      image: ubuntu:18.04
-      volumes:
-        - /tmp/node20:/__e/node20
-    timeout-minutes: 60
+  # catkin:
+  #   runs-on: ubuntu-latest
+  #   container:
+  #     image: ubuntu:18.04
+  #     volumes:
+  #       - /tmp/node20:/__e/node20
+  #   timeout-minutes: 60
 
-    steps:
-      - name: Try to replace `node` with an glibc 2.17
-        shell: bash
-        run: |
-          ls -lar /__e/node20 &&
-          apt update && apt-get install -y curl &&
-          curl -Lo /tmp/node.tar.gz https://unofficial-builds.nodejs.org/download/release/v20.17.0/node-v20.17.0-linux-x64-glibc-217.tar.gz &&
-          cd /__e/node20 &&
-          tar -x --strip-components=1 -f /tmp/node.tar.gz &&
-          ls -lar /__e/node20/bin/
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Setup Apt
-        run: |
-          echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-          apt-get update -qq
-          apt-get install -qq -y lsb-release wget gnupg2  # necessary for catkin-pkg to be installable
-          apt-get install -qq -y dpkg  # necessary for catkin-pkg to be installable
-          echo "Testing branch $GITHUB_REF of $GITHUB_REPOSITORY"
-          sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
-          # Replace the old apt-key add with the new method for adding the key
-          # https://github.com/ros/rosdistro/pull/46048
-          curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
-          apt-get update -qq
-          apt-get install -qq -y python-catkin-tools python-rosdep
-          apt-get install -qq -y build-essential git ros-melodic-rosbash ros-melodic-rospack
-      - name: Setup Src
-        shell: bash
-        run: |
-          export CI_SOURCE_PATH=$(pwd)
-          mkdir -p ~/catkin_ws/src
-          cd ~/catkin_ws/src
-          # checkout euslisp
-          git clone --depth 1 https://github.com/tork-a/euslisp-release euslisp
-          for file in CMakeLists.txt cmake/euslisp-extras.cmake.in env-hooks/99.euslisp.sh.in; do
-              wget https://raw.githubusercontent.com/tork-a/euslisp-release/master/patches/${file} -O euslisp/${file}
-          done
-          wget https://raw.githubusercontent.com/tork-a/euslisp-release/release/melodic/euslisp/package.xml -O euslisp/package.xml
-          # checkout jskeus
-          cp -r ${CI_SOURCE_PATH} ./jskeus
-          wget https://raw.githubusercontent.com/tork-a/jskeus-release/release/melodic/jskeus/package.xml -O jskeus/package.xml
-          wget https://raw.githubusercontent.com/tork-a/jskeus-release/master/patches/CMakeLists.txt -O jskeus/CMakeLists.txt
-          # rosdep install
-          cd ..
-          rosdep init
-          rosdep update
-          rosdep install -y -r --rosdistro melodic --from-paths src --ignore-src
-      - name: Build
-        shell: bash
-        run: |
-          source /opt/ros/melodic/setup.bash
-          cd ~/catkin_ws
-          catkin build -v -i --make-args VERBOSE=1
-      - name: Test
-        shell: bash
-        run: |
-          cd ~/catkin_ws
-          ls -al devel
-          source devel/setup.bash
-          env
-          cd devel/share/euslisp
-          find jskeus/irteus/test -iname "*.l" | grep -v unittest.l | xargs -n1 irteusgl
-      - name: Cleanup
-        shell: bash
-        run: |
-          source /opt/ros/melodic/setup.bash
-          cd ~/catkin_ws
-          catkin clean --yes
-      - name: Build Install
-        shell: bash
-        run: |
-          source /opt/ros/melodic/setup.bash
-          cd ~/catkin_ws
-          catkin config --install
-          catkin build -v -i --make-args VERBOSE=1
+  #   steps:
+  #     - name: Try to replace `node` with an glibc 2.17
+  #       shell: bash
+  #       run: |
+  #         ls -lar /__e/node20 &&
+  #         apt update && apt-get install -y curl &&
+  #         curl -Lo /tmp/node.tar.gz https://unofficial-builds.nodejs.org/download/release/v20.17.0/node-v20.17.0-linux-x64-glibc-217.tar.gz &&
+  #         cd /__e/node20 &&
+  #         tar -x --strip-components=1 -f /tmp/node.tar.gz &&
+  #         ls -lar /__e/node20/bin/
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Setup Apt
+  #       run: |
+  #         echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
+  #         apt-get update -qq
+  #         apt-get install -qq -y lsb-release wget gnupg2  # necessary for catkin-pkg to be installable
+  #         apt-get install -qq -y dpkg  # necessary for catkin-pkg to be installable
+  #         echo "Testing branch $GITHUB_REF of $GITHUB_REPOSITORY"
+  #         sh -c 'echo "deb http://packages.ros.org/ros-shadow-fixed/ubuntu `lsb_release -cs` main" > /etc/apt/sources.list.d/ros-latest.list'
+  #         # Replace the old apt-key add with the new method for adding the key
+  #         # https://github.com/ros/rosdistro/pull/46048
+  #         curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
+  #         apt-get update -qq
+  #         apt-get install -qq -y python-catkin-tools python-rosdep
+  #         apt-get install -qq -y build-essential git ros-melodic-rosbash ros-melodic-rospack
+  #     - name: Setup Src
+  #       shell: bash
+  #       run: |
+  #         export CI_SOURCE_PATH=$(pwd)
+  #         mkdir -p ~/catkin_ws/src
+  #         cd ~/catkin_ws/src
+  #         # checkout euslisp
+  #         git clone --depth 1 https://github.com/tork-a/euslisp-release euslisp
+  #         for file in CMakeLists.txt cmake/euslisp-extras.cmake.in env-hooks/99.euslisp.sh.in; do
+  #             wget https://raw.githubusercontent.com/tork-a/euslisp-release/master/patches/${file} -O euslisp/${file}
+  #         done
+  #         wget https://raw.githubusercontent.com/tork-a/euslisp-release/release/melodic/euslisp/package.xml -O euslisp/package.xml
+  #         # checkout jskeus
+  #         cp -r ${CI_SOURCE_PATH} ./jskeus
+  #         wget https://raw.githubusercontent.com/tork-a/jskeus-release/release/melodic/jskeus/package.xml -O jskeus/package.xml
+  #         wget https://raw.githubusercontent.com/tork-a/jskeus-release/master/patches/CMakeLists.txt -O jskeus/CMakeLists.txt
+  #         # rosdep install
+  #         cd ..
+  #         rosdep init
+  #         rosdep update
+  #         rosdep install -y -r --rosdistro melodic --from-paths src --ignore-src
+  #     - name: Build
+  #       shell: bash
+  #       run: |
+  #         source /opt/ros/melodic/setup.bash
+  #         cd ~/catkin_ws
+  #         catkin build -v -i --make-args VERBOSE=1
+  #     - name: Test
+  #       shell: bash
+  #       run: |
+  #         cd ~/catkin_ws
+  #         ls -al devel
+  #         source devel/setup.bash
+  #         env
+  #         cd devel/share/euslisp
+  #         find jskeus/irteus/test -iname "*.l" | grep -v unittest.l | xargs -n1 irteusgl
+  #     - name: Cleanup
+  #       shell: bash
+  #       run: |
+  #         source /opt/ros/melodic/setup.bash
+  #         cd ~/catkin_ws
+  #         catkin clean --yes
+  #     - name: Build Install
+  #       shell: bash
+  #       run: |
+  #         source /opt/ros/melodic/setup.bash
+  #         cd ~/catkin_ws
+  #         catkin config --install
+  #         catkin build -v -i --make-args VERBOSE=1
 
-  doc:
-    runs-on: ubuntu-latest
-    timeout-minutes: 60
+  # doc:
+  #   runs-on: ubuntu-latest
+  #   timeout-minutes: 60
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Run test
-        shell: bash
-        run: |
-          set -x
-          sudo apt-get update -y -qq
-          sudo apt-get install -y -qq git make gcc g++ libjpeg-dev libxext-dev libx11-dev libgl1-mesa-dev libglu1-mesa-dev libpq-dev libpng-dev xfonts-100dpi xfonts-75dpi pkg-config libbullet-dev
-          make
-          sudo apt-get install -y -qq texlive-binaries texlive-lang-cjk texlive-lang-japanese poppler-utils nkf latex2html
-          (source bashrc.eus; cd doc/; make pdf)
-          (source bashrc.eus; cd doc/; make html)
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Run test
+  #       shell: bash
+  #       run: |
+  #         set -x
+  #         sudo apt-get update -y -qq
+  #         sudo apt-get install -y -qq git make gcc g++ libjpeg-dev libxext-dev libx11-dev libgl1-mesa-dev libglu1-mesa-dev libpq-dev libpng-dev xfonts-100dpi xfonts-75dpi pkg-config libbullet-dev
+  #         make
+  #         sudo apt-get install -y -qq texlive-binaries texlive-lang-cjk texlive-lang-japanese poppler-utils nkf latex2html
+  #         (source bashrc.eus; cd doc/; make pdf)
+  #         (source bashrc.eus; cd doc/; make html)
 
 
-  osx:
-    strategy:
-      matrix:
-        include:
-          # https://github.com/actions/runner-images/tree/main/images/macos
-          # Note: To test macOS-x with Intel architecture,
-          # you need to use the paid macOS-x-large runner, as macOS-x is grouped with ARM-based runners.
-          # https://docs.github.com/en/actions/concepts/runners/about-larger-runners
-          - runs-on: macos-13  # Intel (x64)
-          - runs-on: macos-14  # ARM64 (Apple Silicon)
-          - runs-on: macos-15  # ARM64 (Apple Silicon)
-      fail-fast: false
-    runs-on: ${{ matrix.runs-on }}
-    timeout-minutes: 60
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Get brew cache directory
-        id: brew-cache
-        run: echo "::set-output name=dir::$(brew --cache)/downloads"
-      - name: Brew cache
-        uses: actions/cache@v4
-        with:
-          path: ${{ steps.brew-cache.outputs.dir }}
-          key: ${{ runner.os }}-${{ hashFiles('.github/workflows/Brewfile') }}
-      - name: Brew config
-        run: |
-          cd .github/workflows/
-          brew config
-      - name: Run test
-        shell: bash
-        run: |
-          set -x
-          export CI_SOURCE_PATH=$(pwd)
-          export REPOSITORY_NAME=${PWD##*/}
-          export TRAVIS_BRANCH=${GITHUB_REF#refs/heads/}
-          export LC_CTYPE=C
-          echo insecure >> ~/.curlrc
-          export HOMEBREW_CURLRC=1
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install coreutils
-          export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
-          # since macos-11, we need to install GL/gl.h
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install mesa-glu
-          # since macos-14, we need to install GL/gl.h for mesalib-glw and X11 for xquartz
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install mesalib-glw xquartz
-          # since macos-13, we need to install jpeg
-          HOMEBREW_NO_AUTO_UPDATE=1 brew install jpeg
-          ./.travis-osx.sh
-      - name: Cleanup some brew downloads
-        run: cd ${{ steps.brew-cache.outputs.dir }} && ls -lsS | head -n 10 | awk '{ print $10 }' | xargs rm -rf
+  # osx:
+  #   strategy:
+  #     matrix:
+  #       include:
+  #         # https://github.com/actions/runner-images/tree/main/images/macos
+  #         # Note: To test macOS-x with Intel architecture,
+  #         # you need to use the paid macOS-x-large runner, as macOS-x is grouped with ARM-based runners.
+  #         # https://docs.github.com/en/actions/concepts/runners/about-larger-runners
+  #         - runs-on: macos-13  # Intel (x64)
+  #         - runs-on: macos-14  # ARM64 (Apple Silicon)
+  #         - runs-on: macos-15  # ARM64 (Apple Silicon)
+  #     fail-fast: false
+  #   runs-on: ${{ matrix.runs-on }}
+  #   timeout-minutes: 60
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v2
+  #     - name: Get brew cache directory
+  #       id: brew-cache
+  #       run: echo "::set-output name=dir::$(brew --cache)/downloads"
+  #     - name: Brew cache
+  #       uses: actions/cache@v4
+  #       with:
+  #         path: ${{ steps.brew-cache.outputs.dir }}
+  #         key: ${{ runner.os }}-${{ hashFiles('.github/workflows/Brewfile') }}
+  #     - name: Brew config
+  #       run: |
+  #         cd .github/workflows/
+  #         brew config
+  #     - name: Run test
+  #       shell: bash
+  #       run: |
+  #         set -x
+  #         export CI_SOURCE_PATH=$(pwd)
+  #         export REPOSITORY_NAME=${PWD##*/}
+  #         export TRAVIS_BRANCH=${GITHUB_REF#refs/heads/}
+  #         export LC_CTYPE=C
+  #         echo insecure >> ~/.curlrc
+  #         export HOMEBREW_CURLRC=1
+  #         HOMEBREW_NO_AUTO_UPDATE=1 brew install coreutils
+  #         export PATH="/usr/local/opt/coreutils/libexec/gnubin:$PATH"
+  #         # since macos-11, we need to install GL/gl.h
+  #         HOMEBREW_NO_AUTO_UPDATE=1 brew install mesa-glu
+  #         # since macos-14, we need to install GL/gl.h for mesalib-glw and X11 for xquartz
+  #         HOMEBREW_NO_AUTO_UPDATE=1 brew install mesalib-glw xquartz
+  #         # since macos-13, we need to install jpeg
+  #         HOMEBREW_NO_AUTO_UPDATE=1 brew install jpeg
+  #         ./.travis-osx.sh
+  #     - name: Cleanup some brew downloads
+  #       run: cd ${{ steps.brew-cache.outputs.dir }} && ls -lsS | head -n 10 | awk '{ print $10 }' | xargs rm -rf

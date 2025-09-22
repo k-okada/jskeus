@@ -36,6 +36,11 @@ echo 'debconf debconf/frontend select Noninteractive' | sudo debconf-set-selecti
 #
 sudo apt-get install -qq -y git make gcc g++ libjpeg-dev libxext-dev libx11-dev libgl1-mesa-dev libglu1-mesa-dev libpq-dev libpng-dev xfonts-100dpi xfonts-75dpi pkg-config libbullet-dev  # msttcorefonts could not install on 14.04 travis
 # sudo apt-get install -qq -y texlive-latex-base ptex-bin latex2html nkf poppler-utils || echo "ok" # 16.04 does ont have ptex bin
+
+# test with latest GCC's
+if [[ "$USE_EXPERIMENTAL" == "TRUE" ]]; then
+    apt-get -t=experimental install gcc g++
+fi
 travis_time_end
 
 if [[ "$COLLISION_LIB" != "" ]]; then
